@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Comment;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
-class PostController extends Controller
+class CommentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,8 +16,8 @@ class PostController extends Controller
     public function index()
     {
         //
-        $posts = Post::all();
-        return view('post.index', compact('posts'));
+        $comments = Comment::all();
+        return view('comment.index', compact('comments'));
     }
 
     /**
@@ -24,36 +26,31 @@ class PostController extends Controller
     public function create()
     {
         //
-        return view('post.create');
+        
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, Post $post)
     {
-        // Validation et enregistrement des données du poste de l'utilisateur
+        //
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'nullable|string',
+            
+            'content' => 'required|string'
         ]);
-        
-        // Enregistrement des données validées dans la base de données
         $validated['user_id'] = Auth::id();
-        Post::create($validated); 
-        return redirect()->route('dashboard')->with('success', 'Post created successfully.');  
-
+        $validated['post_id'] = $post->id;
+        Comment::create($validated);
+        return redirect()->route('posts.show', $post->id)->with('success', 'Commentaire ajouté avec succès.');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Post $post)
+    public function show(string $id)
     {
         //
-        $post = Post::find($post->id);
-        return view('post.show', compact('post'));
-
     }
 
     /**
